@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:copier.readthedocs.io)",
+      "Bash(tree:*)",
+      "Bash(chmod:*)",
+      "Bash(./test_template.sh:*)",
+      "Bash(uv tool install:*)",
+      "Bash(cat:*)",
+      "Bash(copier copy:*)",
+      "Read(//tmp/test-check/**)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

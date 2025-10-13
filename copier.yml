@@ -1,0 +1,85 @@
+# Copier template configuration
+_min_copier_version: "9.0.0"
+
+# Jinja extensions for time/date support
+_jinja_extensions:
+  - jinja2_time.TimeExtension
+
+# Template settings
+_subdirectory: template
+
+# Conditional file exclusions
+_exclude:
+  - "{% if not include_docs %}docs{% endif %}"
+  - "{% if not include_docs %}docs/**{% endif %}"
+  - "{% if not include_docs %}mkdocs.yml*{% endif %}"
+  - "{% if not include_github_actions %}.github{% endif %}"
+  - "{% if not include_github_actions %}.github/**{% endif %}"
+
+# Tasks to run after generation
+_tasks:
+  - "uv sync"
+  - "{% if init_git_and_github %}git init{% endif %}"
+  - "{% if init_git_and_github %}git add .{% endif %}"
+  - "{% if init_git_and_github %}git commit -m 'Initial commit from lil-python-template'{% endif %}"
+  - "{% if init_git_and_github %}gh repo create {{ github_username }}/{{ package_name }} --public --source=. --remote=origin --push{% endif %}"
+  - "{% if init_git_and_github and publish_to_pypi %}chmod +x publish.sh{% endif %}"
+  - "{% if init_git_and_github and publish_to_pypi %}./publish.sh{% endif %}"
+
+# Questions for the user
+package_name:
+  type: str
+  help: What is the package name? (e.g., my-awesome-package)
+  default: "{{ _copier_conf.dst_path | basename }}"
+  validator: "{% if not package_name %}Package name is required{% endif %}"
+
+package_slug:
+  type: str
+  help: Python module name (derived from package_name)
+  default: "{{ package_name | replace('-', '_') | replace(' ', '_') | lower }}"
+
+package_description:
+  type: str
+  help: Brief description of the package
+  default: "A Python package"
+
+python_version:
+  type: str
+  help: Python version to use
+  default: "3.12"
+
+author_name:
+  type: str
+  help: Author name
+  default: "Nehal Patel"
+
+author_email:
+  type: str
+  help: Author email
+  default: "nehal@alum.mit.edu"
+
+github_username:
+  type: str
+  help: GitHub username
+  default: "habemus-papadum"
+
+include_docs:
+  type: bool
+  help: Include mkdocs documentation setup?
+  default: true
+
+include_github_actions:
+  type: bool
+  help: Include GitHub Actions workflow for docs?
+  default: true
+
+init_git_and_github:
+  type: bool
+  help: Initialize git repository and create GitHub repo?
+  default: true
+
+publish_to_pypi:
+  type: bool
+  help: Publish package to PyPI to reserve the name?
+  default: true
+  when: "{{ init_git_and_github }}"

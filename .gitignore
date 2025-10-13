@@ -1,0 +1,28 @@
+# Temporary test projects
+test-project/
+test_*/
+test-generated-*/
+
+# Copier answers file (if testing locally)
+.copier-answers.yml
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv
+venv/
+ENV/
+
+# IDE
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary directory from testing
+interactive-json-tree/

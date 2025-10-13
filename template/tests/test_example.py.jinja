@@ -1,0 +1,15 @@
+"""Example tests for {{ package_name }}."""
+
+import {{ package_slug }}
+
+
+def test_version():
+    """Test that the package has a version."""
+    assert hasattr({{ package_slug }}, "__version__")
+    assert isinstance({{ package_slug }}.__version__, str)
+    assert len({{ package_slug }}.__version__) > 0
+
+
+def test_import():
+    """Test that the package can be imported."""
+    assert {{ package_slug }} is not None
