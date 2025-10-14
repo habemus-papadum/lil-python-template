@@ -1,7 +1,9 @@
 # {{ package_name }}
 
-[![CI](https://github.com/{{ github_username }}/{{ package_name }}/actions/workflows/ci.yml/badge.svg)](https://github.com/{{ github_username }}/{{ package_name }}/actions/workflows/ci.yml){% if include_docs %}
-[![Documentation](https://img.shields.io/badge/Documentation-blue.svg)](https://{{ github_username }}.github.io/{{ package_name }}/){% endif %}
+[![CI](https://github.com/{{ github_username }}/{{ package_name }}/actions/workflows/ci.yml/badge.svg)](https://github.com/{{ github_username }}/{{ package_name }}/actions/workflows/ci.yml)
+{%- if include_docs %}
+[![Documentation](https://img.shields.io/badge/Documentation-blue.svg)](https://{{ github_username }}.github.io/{{ package_name }}/)
+{%- endif %}
 [![PyPI](https://img.shields.io/pypi/v/{{ package_name }}.svg)](https://pypi.org/project/{{ package_name }}/)
 [![Python {{ python_version }}+](https://img.shields.io/badge/python-{{ python_version }}+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
