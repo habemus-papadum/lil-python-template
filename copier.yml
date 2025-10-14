@@ -18,7 +18,7 @@ _tasks:
   - "chmod +x publish.sh"
   - "chmod +x nb.sh"
   - "chmod +x test_notebooks.sh"
-  - "cd docs && ln -sf ../README.md README.md"
+  - "cd docs && ln -sf ../README.md index.md"
   - command: "git init"
     when: "{{ init_git_and_github }}"
   - command: "git add ."
