@@ -1,12 +1,10 @@
-{% if include_github_actions and include_docs -%}
-{% raw -%}
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
-  # Runs when a new release is published
-  release:
-    types: [published]
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -42,7 +40,7 @@ jobs:
           enable-cache: true
 
       - name: Create Virtual Environment
-        run: uv sync --frozen{% endraw %}{% if include_docs %} --all-extras{% endif %}{% raw %}
+        run: uv sync --frozen
 
       - name: Generate Docs
         run: uv run mkdocs build
@@ -55,5 +53,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-{% endraw -%}
-{%- endif %}
+

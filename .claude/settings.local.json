@@ -10,7 +10,9 @@
       "Bash(cat:*)",
       "Bash(copier copy:*)",
       "Read(//tmp/test-check/**)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Read(//Users/nehal/src/structured-prompts/**)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

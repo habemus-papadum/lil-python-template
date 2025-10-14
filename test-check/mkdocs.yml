@@ -1,9 +1,8 @@
-{% if include_docs -%}
-site_name: {{ package_name }}
-site_description: {{ package_description }}
-site_author: {{ author_name }}
-repo_url: https://github.com/{{ github_username }}/{{ package_name }}
-repo_name: {{ package_name }}
+site_name: test-check
+site_description: A Python package
+site_author: Nehal Patel
+repo_url: https://github.com/habemus-papadum/test-check
+repo_name: test-check
 
 theme:
   name: "material"
@@ -18,7 +17,6 @@ docs_dir: docs
 # Plugins to enable
 plugins:
   - search
-  - mkdocs-jupyter
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -26,4 +24,3 @@ plugins:
           options:
             docstring_style: numpy
             show_submodules: true
-{%- endif %}

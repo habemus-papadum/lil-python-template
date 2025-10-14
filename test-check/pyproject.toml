@@ -1,7 +1,7 @@
 [project]
-name = "{{ package_name }}"
+name = "test-check"
 version = "0.1.0"
-description = "{{ package_description }}"
+description = "A Python package"
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = []
@@ -15,15 +15,15 @@ classifiers = [
 ]
 
 authors = [
-    { name = "{{ author_name }}", email = "{{ author_email }}" }
+    { name = "Nehal Patel", email = "nehal@alum.mit.edu" }
 ]
-requires-python = ">={{ python_version }}"
+requires-python = ">=3.12"
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/{{ github_username }}/{{ package_name }}"
-Repository = "https://github.com/{{ github_username }}/{{ package_name }}"
-Documentation = "https://github.com/{{ github_username }}/{{ package_name }}"
+Homepage = "https://github.com/habemus-papadum/test-check"
+Repository = "https://github.com/habemus-papadum/test-check"
+Documentation = "https://github.com/habemus-papadum/test-check"
 
 
 [build-system]
@@ -34,20 +34,15 @@ build-backend = "hatchling.build"
 dev = [
     "hatch>=1.14.2",
     "pytest>=8.0.0",
-    "pytest-cov>=7.0.0",
     "ruff>=0.13.3",
-{%- if include_docs %}
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.5.0",
     "mkdocstrings>=0.26.1",
     "mkdocstrings-python>=1.11.1",
-    "mkdocs-jupyter>=0.25.1",
-    "jupyter>=1.1.1",
-{%- endif %}
 ]
 
 [tool.ruff]
-target-version = "py{{ python_version | replace('.', '') }}"
+target-version = "py312"
 line-length = 120
 exclude = []
 
@@ -61,11 +56,3 @@ addopts = "-s"
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-
-[tool.coverage.run]
-source = ["src/{{ package_slug }}"]
-relative_files = true
-omit = [
-    "*/tests/*",
-    "*/testing.py",
-]

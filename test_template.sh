@@ -52,6 +52,13 @@ REQUIRED_FILES=(
     "mkdocs.yml"
     "docs/index.md"
     "docs/reference.md"
+    "docs/demos/README.md"
+    "docs/demos/topics/README.md"
+    "release.sh"
+    "nb.sh"
+    "test_notebooks.sh"
+    "AGENTS.md"
+    ".github/workflows/ci.yml"
     ".github/workflows/docs.yml"
 )
 
@@ -139,6 +146,27 @@ else
     exit 1
 fi
 
+# Note: Skipping notebook tests as no notebooks exist initially
+# Users should add notebooks and test with ./test_notebooks.sh
+
+# Verify scripts are executable
+echo -e "${YELLOW}Verifying scripts are executable...${NC}"
+EXECUTABLE_SCRIPTS=(
+    "release.sh"
+    "publish.sh"
+    "nb.sh"
+    "test_notebooks.sh"
+)
+
+for script in "${EXECUTABLE_SCRIPTS[@]}"; do
+    if [ -x "$script" ]; then
+        echo -e "${GREEN}✓${NC} $script is executable"
+    else
+        echo -e "${RED}✗${NC} $script is not executable!"
+        exit 1
+    fi
+done
+
 # Verify pyproject.toml has correct content
 echo -e "${YELLOW}Verifying pyproject.toml content...${NC}"
 if grep -q 'name = "test-awesome-package"' pyproject.toml; then
@@ -152,6 +180,48 @@ if grep -q 'requires-python = ">=3.12"' pyproject.toml; then
     echo -e "${GREEN}✓${NC} Python version requirement is correct"
 else
     echo -e "${RED}✗${NC} Python version requirement is incorrect"
+    exit 1
+fi
+
+# Verify coverage configuration exists
+echo -e "${YELLOW}Verifying coverage configuration...${NC}"
+if grep -q '\[tool.coverage.run\]' pyproject.toml; then
+    echo -e "${GREEN}✓${NC} Coverage configuration found in pyproject.toml"
+else
+    echo -e "${RED}✗${NC} Coverage configuration missing from pyproject.toml"
+    exit 1
+fi
+
+# Verify pytest-cov dependency
+if grep -q 'pytest-cov' pyproject.toml; then
+    echo -e "${GREEN}✓${NC} pytest-cov dependency found"
+else
+    echo -e "${RED}✗${NC} pytest-cov dependency missing"
+    exit 1
+fi
+
+# Verify mkdocs-jupyter dependency
+if grep -q 'mkdocs-jupyter' pyproject.toml; then
+    echo -e "${GREEN}✓${NC} mkdocs-jupyter dependency found"
+else
+    echo -e "${RED}✗${NC} mkdocs-jupyter dependency missing"
+    exit 1
+fi
+
+# Verify CI workflow includes coverage
+echo -e "${YELLOW}Verifying CI workflow...${NC}"
+if grep -q 'pytest --cov=' .github/workflows/ci.yml; then
+    echo -e "${GREEN}✓${NC} CI workflow includes coverage reporting"
+else
+    echo -e "${RED}✗${NC} CI workflow missing coverage reporting"
+    exit 1
+fi
+
+# Verify docs workflow triggers on release
+if grep -q 'release:' .github/workflows/docs.yml; then
+    echo -e "${GREEN}✓${NC} Docs workflow triggers on release"
+else
+    echo -e "${RED}✗${NC} Docs workflow doesn't trigger on release"
     exit 1
 fi
 
@@ -174,10 +244,34 @@ copier copy --defaults --trust \
 cd "$TEST_DIR_NO_DOCS"
 
 # Verify docs files don't exist when not included
-if [ ! -f "mkdocs.yml" ] && [ ! -d "docs" ] && [ ! -f ".github/workflows/docs.yml" ]; then
+if [ ! -f "mkdocs.yml" ] && [ ! -d "docs" ] && [ ! -f ".github/workflows/docs.yml" ] && [ ! -f "nb.sh" ] && [ ! -f "test_notebooks.sh" ]; then
     echo -e "${GREEN}✓${NC} Documentation files correctly excluded"
 else
     echo -e "${RED}✗${NC} Documentation files exist when they shouldn't"
+    exit 1
+fi
+
+# Verify CI workflow exists even without docs
+if [ -f ".github/workflows/ci.yml" ]; then
+    echo -e "${GREEN}✓${NC} CI workflow exists (always included)"
+else
+    echo -e "${RED}✗${NC} CI workflow missing"
+    exit 1
+fi
+
+# Verify release.sh exists even without docs
+if [ -f "release.sh" ] && [ -x "release.sh" ]; then
+    echo -e "${GREEN}✓${NC} release.sh exists and is executable"
+else
+    echo -e "${RED}✗${NC} release.sh missing or not executable"
+    exit 1
+fi
+
+# Verify AGENTS.md exists
+if [ -f "AGENTS.md" ]; then
+    echo -e "${GREEN}✓${NC} AGENTS.md exists"
+else
+    echo -e "${RED}✗${NC} AGENTS.md missing"
     exit 1
 fi
 
