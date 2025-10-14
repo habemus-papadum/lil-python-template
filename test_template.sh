@@ -25,8 +25,6 @@ copier copy --defaults --trust \
     -d author_name="Test User" \
     -d author_email="test@example.com" \
     -d github_username="testuser" \
-    -d include_docs=true \
-    -d include_github_actions=true \
     -d init_git_and_github=false \
     . "$TEST_DIR"
 
@@ -63,13 +61,28 @@ REQUIRED_FILES=(
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
-    if [ -f "$file" ]; then
+    if [ -f "$file" ] || [ -L "$file" ]; then
         echo -e "${GREEN}✓${NC} $file exists"
     else
         echo -e "${RED}✗${NC} $file is missing!"
         exit 1
     fi
 done
+
+# Verify docs/index.md is a symlink to README.md
+echo -e "${YELLOW}Verifying docs/index.md symlink...${NC}"
+if [ -L "docs/index.md" ]; then
+    TARGET=$(readlink "docs/index.md")
+    if [ "$TARGET" = "../README.md" ]; then
+        echo -e "${GREEN}✓${NC} docs/index.md is a symlink to ../README.md"
+    else
+        echo -e "${RED}✗${NC} docs/index.md symlink target is wrong: $TARGET"
+        exit 1
+    fi
+else
+    echo -e "${RED}✗${NC} docs/index.md is not a symlink!"
+    exit 1
+fi
 
 # Check Python version
 echo -e "${YELLOW}Checking Python version...${NC}"
@@ -225,83 +238,6 @@ else
     exit 1
 fi
 
-# Test without docs
-cd ..
-TEST_DIR_NO_DOCS="test-generated-project-no-docs"
-if [ -d "$TEST_DIR_NO_DOCS" ]; then
-    rm -rf "$TEST_DIR_NO_DOCS"
-fi
-
-echo -e "${YELLOW}Testing template without docs...${NC}"
-copier copy --defaults --trust \
-    -d package_name="test-minimal-package" \
-    -d python_version="3.11" \
-    -d include_docs=false \
-    -d include_github_actions=false \
-    -d init_git_and_github=false \
-    . "$TEST_DIR_NO_DOCS"
-
-cd "$TEST_DIR_NO_DOCS"
-
-# Verify docs files don't exist when not included
-if [ ! -f "mkdocs.yml" ] && [ ! -d "docs" ] && [ ! -f ".github/workflows/docs.yml" ] && [ ! -f "nb.sh" ] && [ ! -f "test_notebooks.sh" ]; then
-    echo -e "${GREEN}✓${NC} Documentation files correctly excluded"
-else
-    echo -e "${RED}✗${NC} Documentation files exist when they shouldn't"
-    exit 1
-fi
-
-# Verify CI workflow exists even without docs
-if [ -f ".github/workflows/ci.yml" ]; then
-    echo -e "${GREEN}✓${NC} CI workflow exists (always included)"
-else
-    echo -e "${RED}✗${NC} CI workflow missing"
-    exit 1
-fi
-
-# Verify release.sh exists even without docs
-if [ -f "release.sh" ] && [ -x "release.sh" ]; then
-    echo -e "${GREEN}✓${NC} release.sh exists and is executable"
-else
-    echo -e "${RED}✗${NC} release.sh missing or not executable"
-    exit 1
-fi
-
-# Verify AGENTS.md exists
-if [ -f "AGENTS.md" ]; then
-    echo -e "${GREEN}✓${NC} AGENTS.md exists"
-else
-    echo -e "${RED}✗${NC} AGENTS.md missing"
-    exit 1
-fi
-
-# Verify it still works
-echo -e "${YELLOW}Testing minimal package import...${NC}"
-if uv run python -c "import test_minimal_package; print(f'Version: {test_minimal_package.__version__}')"; then
-    echo -e "${GREEN}✓${NC} Minimal package works correctly"
-else
-    echo -e "${RED}✗${NC} Minimal package failed"
-    exit 1
-fi
-
-# Run pytest tests for minimal package
-echo -e "${YELLOW}Running pytest tests for minimal package...${NC}"
-if uv run pytest; then
-    echo -e "${GREEN}✓${NC} All tests passed"
-else
-    echo -e "${RED}✗${NC} Tests failed!"
-    exit 1
-fi
-
-# Check Python 3.11 version
-ACTUAL_VERSION=$(cat .python-version)
-if [ "$ACTUAL_VERSION" = "3.11" ]; then
-    echo -e "${GREEN}✓${NC} Python version 3.11 is correct"
-else
-    echo -e "${RED}✗${NC} Python version should be 3.11, got: $ACTUAL_VERSION"
-    exit 1
-fi
-
 cd ..
 
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -310,5 +246,5 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 
 # Clean up
 echo -e "${YELLOW}Cleaning up test directories...${NC}"
-rm -rf "$TEST_DIR" "$TEST_DIR_NO_DOCS"
+rm -rf "$TEST_DIR"
 echo -e "${GREEN}Done!${NC}"
