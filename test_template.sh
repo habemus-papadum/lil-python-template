@@ -152,7 +152,7 @@ fi
 
 # Test mkdocs build
 echo -e "${YELLOW}Building documentation...${NC}"
-if uv run mkdocs build; then
+if uv run python -m mkdocs build; then
     echo -e "${GREEN}✓${NC} Documentation built successfully"
 else
     echo -e "${RED}✗${NC} Documentation build failed!"
