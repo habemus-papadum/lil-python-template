@@ -26,3 +26,5 @@ Thumbs.db
 
 # Temporary directory from testing
 interactive-json-tree/
+test_check
+test-check
