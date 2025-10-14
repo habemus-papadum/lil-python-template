@@ -11,28 +11,24 @@ _subdirectory: template
 # Template suffixes - treat .ipynb files as Jinja templates
 _templates_suffix: ".jinja"
 
-# Conditional file exclusions
-_exclude:
-  - "{% if not include_docs %}docs{% endif %}"
-  - "{% if not include_docs %}docs/**{% endif %}"
-  - "{% if not include_docs %}mkdocs.yml*{% endif %}"
-  - "{% if not include_docs %}nb.sh{% endif %}"
-  - "{% if not include_docs %}test_notebooks.sh{% endif %}"
-  - "{% if not include_github_actions %}.github{% endif %}"
-  - "{% if not include_github_actions %}.github/**{% endif %}"
-
 # Tasks to run after generation
 _tasks:
   - "uv sync"
   - "chmod +x release.sh"
   - "chmod +x publish.sh"
-  - "{% if include_docs %}chmod +x nb.sh{% endif %}"
-  - "{% if include_docs %}chmod +x test_notebooks.sh{% endif %}"
-  - "{% if init_git_and_github %}git init{% endif %}"
-  - "{% if init_git_and_github %}git add .{% endif %}"
-  - "{% if init_git_and_github %}git commit -m 'Initial commit from lil-python-template'{% endif %}"
-  - "{% if init_git_and_github %}gh repo create {{ github_username }}/{{ package_name }} --public --source=. --remote=origin --push{% endif %}"
-  - "{% if init_git_and_github and publish_to_pypi %}./publish.sh{% endif %}"
+  - "chmod +x nb.sh"
+  - "chmod +x test_notebooks.sh"
+  - "cd docs && ln -sf ../README.md README.md"
+  - command: "git init"
+    when: "{{ init_git_and_github }}"
+  - command: "git add ."
+    when: "{{ init_git_and_github }}"
+  - command: "git commit -m 'Initial commit from lil-python-template'"
+    when: "{{ init_git_and_github }}"
+  - command: "gh repo create {{ github_username }}/{{ package_name }} --public --source=. --remote=origin --push"
+    when: "{{ init_git_and_github }}"
+  - command: "./publish.sh"
+    when: "{{ init_git_and_github and publish_to_pypi }}"
 
 # Questions for the user
 package_name:
@@ -70,16 +66,6 @@ github_username:
   type: str
   help: GitHub username
   default: "habemus-papadum"
-
-include_docs:
-  type: bool
-  help: Include mkdocs documentation setup?
-  default: true
-
-include_github_actions:
-  type: bool
-  help: Include GitHub Actions workflow for docs?
-  default: true
 
 init_git_and_github:
   type: bool
