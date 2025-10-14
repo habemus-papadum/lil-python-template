@@ -13,12 +13,12 @@ _templates_suffix: ".jinja"
 
 # Tasks to run after generation
 _tasks:
-  - "uv sync"
-  - "chmod +x release.sh"
-  - "chmod +x publish.sh"
-  - "chmod +x nb.sh"
-  - "chmod +x test_notebooks.sh"
-  - "cd docs && ln -sf ../README.md index.md"
+  - command: "uv sync"
+  - command: "chmod +x release.sh"
+  - command: "chmod +x publish.sh"
+  - command: "chmod +x nb.sh"
+  - command: "chmod +x test_notebooks.sh"
+  - command: "cd docs && ln -sf ../README.md index.md"
   - command: "git init"
     when: "{{ init_git_and_github }}"
   - command: "git add ."
