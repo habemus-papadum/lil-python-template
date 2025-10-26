@@ -18,7 +18,7 @@ To add a new topic notebook:
        - My Topic: demos/topics/my-topic.ipynb
      - API: reference.md
    ```
-3. Run `./test_notebooks.sh` to ensure it executes without errors
+3. Run `./scripts/test_notebooks.sh` to ensure it executes without errors
 4. Commit and push your changes
 
 ## Testing Notebooks
@@ -26,7 +26,7 @@ To add a new topic notebook:
 Before committing any notebook changes, always run:
 
 ```bash
-./test_notebooks.sh
+./scripts/test_notebooks.sh
 ```
 
 This ensures all notebooks execute without errors and helps maintain quality.

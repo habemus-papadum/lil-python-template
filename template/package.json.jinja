@@ -1,0 +1,32 @@
+{
+  "name": "{{ package_name }}",
+  "version": "0.1.0",
+  "private": true,
+  "description": "{{ package_description }}",
+  "author": "{{ author_name }} <{{ author_email }}>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/{{ github_username }}/{{ package_name }}.git"
+  },
+  "scripts": {
+    {% if include_ts_widgets %}
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
+    {% else %}
+    "check": "echo 'No Node workspace configured'"
+    {% endif %}
+  }{% if include_ts_widgets %},
+  "workspaces": [
+    "widgets"
+  ],
+  "devDependencies": {
+    "pnpm": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  }
+  {% endif %}
+}

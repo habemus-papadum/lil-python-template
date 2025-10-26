@@ -19,14 +19,14 @@ The project uses a modern Python toolchain with UV for dependency management.
 If you think a version change is needed, inform the user but do not make the change yourself.
 
 ### Release Management
-**ABSOLUTELY NEVER RUN THE RELEASE SCRIPT (`./release.sh`).** This is a production deployment script that:
+**ABSOLUTELY NEVER RUN THE RELEASE SCRIPT (`./scripts/release.sh`).** This is a production deployment script that:
 - Publishes the package to PyPI (affects real users)
 - Creates GitHub releases (public and permanent)
 - Pushes commits and tags to the repository
 - Triggers documentation deployment
 
 **This script should ONLY be run by a human who fully understands the consequences.** Do not:
-- Execute `./release.sh` under any circumstances
+- Execute `./scripts/release.sh` under any circumstances
 - Suggest running it unless the user explicitly asks about the release process
 - Include it in automated workflows or scripts
 
@@ -36,20 +36,13 @@ If the user needs to make a release, explain the process but let them run the sc
 
 ### Environment Setup
 ```bash
-# Install dependencies and sync environment (includes dev dependencies)
-uv sync --frozen
-
-{%- if include_docs %}
-# Or install with all optional dependencies (if package has extras)
-uv sync --frozen --all-extras
-{%- endif %}
+# Bootstrap the full toolchain (uv sync, pnpm install, widget build, hooks)
+./scripts/setup.sh
 ```
 
 **Important for Development**:
 - Use `uv sync --frozen` to ensure the lockfile is used without modification, maintaining reproducible builds
-{%- if include_docs %}
-- The `--all-extras` flag installs optional dependencies if your package defines any
-{%- endif %}
+- Re-run `./scripts/setup.sh` whenever dependencies change
 
 ### Testing
 ```bash
@@ -89,17 +82,35 @@ uv run mkdocs serve
 uv run mkdocs build
 
 # Test demo notebooks (REQUIRED after any notebook changes)
-./test_notebooks.sh
+./scripts/test_notebooks.sh
 ```
 
-**Important**: After making any changes to demo notebooks (files in `docs/demos/*.ipynb`), you MUST run `./test_notebooks.sh` to verify the notebook executes without errors. Do not consider notebook changes complete until this test passes.
+**Important**: After making any changes to demo notebooks (files in `docs/demos/*.ipynb`), you MUST run `./scripts/test_notebooks.sh` to verify the notebook executes without errors. Do not consider notebook changes complete until this test passes.
 {%- endif %}
 
 ### Publishing
 ```bash
 # Build and publish to PyPI (requires credentials)
-./publish.sh
+./scripts/publish.sh
 ```
+
+{%- if include_ts_widgets %}
+
+### TypeScript widgets (pnpm)
+```bash
+# Workspace-wide lint
+pnpm lint
+
+# Focus on the widgets package
+pnpm --filter '{{ widget_package_name }}' typecheck
+pnpm --filter '{{ widget_package_name }}' build:python
+pnpm --filter '{{ widget_package_name }}' test:coverage
+```
+
+- Widget bundle lives in `widgets/`; the compiled JS is copied into `src/{{ package_slug }}/widgets/index.js`
+- Never commit `widgets/dist/`—it is generated
+- Use `./scripts/pre-release.sh` before asking for review or release
+{%- endif %}
 
 ## Architecture
 
@@ -117,7 +128,7 @@ uv run mkdocs build
 
 ### Key Constraints
 - **Python Version**: Requires Python {{ python_version }}+
-- **Dependency Management**: Uses UV exclusively; uv.lock is committed
+- **Dependency Management**: {% if include_ts_widgets %}Uses UV for Python and pnpm for the widgets workspace; uv.lock is committed{% else %}Uses UV exclusively; uv.lock is committed{% endif %}
 - **Build System**: Uses Hatch/Hatchling for building distributions
 {%- if include_docs %}
 - **Documentation Style**: NumPy docstring style (see mkdocs.yml)
@@ -165,13 +176,13 @@ omit = [
 ### Continuous Integration
 The project uses GitHub Actions for CI (`.github/workflows/ci.yml`):
 - Runs on every push to main and pull requests
-- Executes linting with ruff
+{% if include_ts_widgets %}- Executes pnpm lint/build/test for the widgets workspace (and publishes a TypeScript coverage badge on main)
+{% endif %}- Executes linting with ruff
 - Runs unit tests with coverage reporting
 {%- if include_docs %}
-- Tests all demo notebooks in read-only mode
 - Builds documentation to verify it compiles
 {%- endif %}
-- Posts coverage report as PR comment
+- Posts coverage report as a PR comment
 
 {%- if include_github_actions and include_docs %}
 
@@ -179,11 +190,11 @@ The project uses GitHub Actions for CI (`.github/workflows/ci.yml`):
 Documentation is deployed to GitHub Pages (`.github/workflows/docs.yml`):
 - Triggered when a GitHub release is published
 - Can also be triggered manually via workflow_dispatch
-- Builds and deploys documentation to GitHub Pages
+- Uses `./scripts/setup.sh` to ensure widgets are built before running `mkdocs build`
 {%- endif %}
 
 ### Release Process
-Releases are managed by the `./release.sh` script (HUMANS ONLY):
+Releases are managed by the `./scripts/release.sh` script (HUMANS ONLY):
 1. Validates git repo is clean
 2. Checks version has `-alpha` suffix
 3. Runs all validation (tests{% if include_docs %}, notebooks{% endif %}, linting{% if include_docs %}, docs{% endif %})

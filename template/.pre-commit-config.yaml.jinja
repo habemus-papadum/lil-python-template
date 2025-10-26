@@ -1,0 +1,45 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+
+repos:
+  # Strip outputs from Jupyter notebooks
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+        name: Strip notebook outputs
+        files: \.ipynb$
+
+  # Basic file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.ipynb$
+      - id: end-of-file-fixer
+        exclude: \.ipynb$
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+  # Python linting with ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff
+        name: Lint Python with ruff
+        args: [--fix]
+      - id: ruff-format
+        name: Format Python with ruff
+
+{% if include_ts_widgets %}
+  # TypeScript linting with eslint
+  - repo: local
+    hooks:
+      - id: typescript-lint
+        name: Lint TypeScript with eslint
+        entry: pnpm --filter '{{ widget_package_name }}' lint
+        language: system
+        files: widgets/src/.*\.(ts|tsx)$
+        pass_filenames: false
+{% endif %}

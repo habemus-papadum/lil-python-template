@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# Build script for {{ package_name }}
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${SCRIPT_DIR}/.."
+
+cd "$REPO_ROOT"
+
+echo "============================================="
+echo "Building {{ package_name }}"
+echo "============================================="
+echo ""
+
+check_command() {
+    local cmd=$1
+    local install_url=$2
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "❌ Error: $cmd is not installed"
+        echo "   Install it from: $install_url"
+        exit 1
+    fi
+    echo "   ✓ $cmd found: $($cmd --version | head -n 1)"
+}
+
+echo "1. Checking prerequisites..."
+check_command uv "https://docs.astral.sh/uv/getting-started/installation/"
+{% if include_ts_widgets %}
+check_command pnpm "https://pnpm.io/installation"
+{% endif %}
+
+echo ""
+echo "2. Installing Python dependencies..."
+uv sync --frozen{% if include_docs %} --all-extras{% endif %}
+
+{% if include_ts_widgets %}
+echo ""
+echo "3. Installing pnpm packages..."
+pnpm install
+
+
+echo "4. Type checking TypeScript widgets..."
+pnpm --filter '{{ widget_package_name }}' typecheck
+
+
+echo "5. Building TypeScript widgets..."
+pnpm --filter '{{ widget_package_name }}' build:python
+{% else %}
+echo ""
+echo "3. (Skipped) No TypeScript widgets configured"
+{% endif %}
+
+echo ""
+echo "============================================="
+echo "✅ Build complete!"
+echo "============================================="

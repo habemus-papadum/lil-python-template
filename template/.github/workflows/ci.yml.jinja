@@ -10,45 +10,114 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: read
+  repository-projects: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12"]
+    permissions:
+      pull-requests: write
+      contents: write
+      actions: read
+      repository-projects: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+{% endraw %}
+{% if include_ts_widgets %}{% raw %}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+{% endraw %}{% endif %}{% raw %}
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
 
-      - name: Create Virtual Environment
-        run: uv sync --frozen{% endraw %}{% if include_docs %} --all-extras{% endif %}{% raw %}
+      - name: Project Setup
+        run: ./scripts/setup.sh
+{% endraw %}
+{% if include_ts_widgets %}{% raw %}
+      - name: pnpm Lint
+        run: pnpm lint
+
+      - name: Build Widgets for Python
+        run: pnpm --filter '{% endraw %}{{ widget_package_name }}{% raw %}' build:python
+
+      - name: pnpm Test (coverage)
+        run: pnpm --filter '{% endraw %}{{ widget_package_name }}{% raw %}' test:coverage
+
+      - name: Generate TypeScript Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        working-directory: widgets
+        run: |
+          COVERAGE=$(node -p "const summary = require('./coverage/coverage-summary.json');
+            const t = summary.total;
+            Math.round((t.statements.pct + t.branches.pct + t.functions.pct + t.lines.pct) / 4);")
+          echo "TypeScript Coverage: ${COVERAGE}%"
+          if [ "$COVERAGE" -ge 80 ]; then
+            COLOR="brightgreen"
+          elif [ "$COVERAGE" -ge 70 ]; then
+            COLOR="orange"
+          else
+            COLOR="red"
+          fi
+          mkdir -p ../badges
+          curl -o ../badges/typescript-coverage.svg \
+            "https://img.shields.io/badge/TypeScript_Coverage-${COVERAGE}%25-${COLOR}"
+
+      - name: Deploy TypeScript Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./badges
+          publish_branch: typescript-coverage-badge
+          keep_files: false
+{% endraw %}{% endif %}{% raw %}
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: uv run playwright install --with-deps chromium
+
+      - name: Install Playwright System Dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: uv run playwright install-deps chromium
 
       - name: Run Linting
         run: uv run ruff check .
 
-      - name: Run Unit Tests with Coverage
+      - name: Run Tests with Coverage
         run: uv run pytest --cov=src/{% endraw %}{{ package_slug }}{% raw %} --cov-report=xml --cov-report=term
 {% endraw %}
-{%- if include_docs %}
-{% raw %}
-      # Uncomment when you have notebooks in docs/demos/
-      # - name: Run Notebook Tests
-      #   run: ./test_notebooks.sh --no-inplace
-
-{% endraw %}{%- endif %}
-{%- if include_docs %}
-{% raw %}
+{% if include_docs %}{% raw %}
       - name: Build Documentation
         run: uv run mkdocs build
+{% endraw %}{% endif %}{% raw %}
+      - name: Temporarily disable git hooks for coverage action
+        run: |
+          if [ -f .git/hooks/pre-commit ]; then
+            mv .git/hooks/pre-commit .git/hooks/pre-commit.disabled
+          fi
 
-{% endraw %}{%- endif %}
-{% raw %}
       - name: Coverage Comment
         id: coverage_comment
         uses: py-cov-action/python-coverage-comment-action@v3
@@ -56,6 +125,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           MINIMUM_GREEN: 80
           MINIMUM_ORANGE: 70
+
+      - name: Re-enable git hooks
+        if: always()
+        run: |
+          if [ -f .git/hooks/pre-commit.disabled ]; then
+            mv .git/hooks/pre-commit.disabled .git/hooks/pre-commit
+          fi
 
       - name: Store Pull Request comment to be posted
         uses: actions/upload-artifact@v4
