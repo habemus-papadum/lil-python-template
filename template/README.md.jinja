@@ -4,6 +4,9 @@
 {%- if include_docs %}
 [![Documentation](https://img.shields.io/badge/Documentation-blue.svg)](https://{{ github_username }}.github.io/{{ package_name }}/)
 {%- endif %}
+{%- if include_ts_widgets %}
+[![TypeScript Coverage](https://raw.githubusercontent.com/{{ github_username }}/{{ package_name }}/typescript-coverage-badge/typescript-coverage.svg)](https://github.com/{{ github_username }}/{{ package_name }}/tree/main/widgets)
+{%- endif %}
 [![PyPI](https://img.shields.io/pypi/v/{{ package_name }}.svg)](https://pypi.org/project/{{ package_name }}/)
 [![Python {{ python_version }}+](https://img.shields.io/badge/python-{{ python_version }}+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -34,24 +37,24 @@ This project uses [UV](https://docs.astral.sh/uv/) for dependency management.
 ```bash
 # Install UV if you haven't already
 curl -LsSf https://astral.sh/uv/install.sh | sh
+{%- if include_ts_widgets %}
+# Install pnpm (required for the widgets workspace)
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+{%- endif %}
 
 # Clone the repository
 git clone https://github.com/{{ github_username }}/{{ package_name }}.git
 cd {{ package_name }}
 
-# Create a virtual environment and install dependencies (including dev dependencies)
-uv sync --frozen
-{%- if include_docs %}
-
-# Or install with all optional dependencies
-uv sync --frozen --all-extras
-{%- endif %}
+# Provision the entire toolchain (uv sync, pnpm install, widget build, pre-commit hooks)
+./scripts/setup.sh
 ```
 
 **Important for Development**:
-- Use `uv sync --frozen` to ensure the lockfile is used without modification, maintaining reproducible builds
-{%- if include_docs %}
-- The `--all-extras` flag installs optional dependencies if your package defines any
+- `./scripts/setup.sh` is idempotent—rerun it after pulling dependency changes
+- Use `uv sync --frozen` to ensure the lockfile is respected when installing Python deps
+{%- if include_ts_widgets %}
+- The widgets live in `widgets/` and are managed with pnpm (see "TypeScript widgets" below)
 {%- endif %}
 
 ### Running Tests
@@ -82,6 +85,24 @@ uv run ruff format .
 # Fix auto-fixable issues
 uv run ruff check --fix .
 ```
+{%- if include_ts_widgets %}
+
+### TypeScript widgets (pnpm)
+
+```bash
+# Lint the widget source
+pnpm lint
+
+# Type-check only the widgets package
+pnpm --filter '{{ widget_package_name }}' typecheck
+
+# Build the browser bundle and copy it into the Python package
+pnpm --filter '{{ widget_package_name }}' build:python
+
+# Run Vitest (or add --coverage)
+pnpm --filter '{{ widget_package_name }}' test
+```
+{%- endif %}
 {%- if include_docs %}
 
 ### Documentation
@@ -94,16 +115,19 @@ uv run mkdocs serve
 uv run mkdocs build
 
 # Test demo notebooks (if you have notebooks in docs/demos/)
-./test_notebooks.sh
+./scripts/test_notebooks.sh
 ```
 
-**Important**: After making any changes to demo notebooks, run `./test_notebooks.sh` to verify they execute without errors.
+**Important**: After making any changes to demo notebooks, run `./scripts/test_notebooks.sh` to verify they execute without errors.
 {%- endif %}
 
 ### Building
 
 ```bash
-# Build distribution packages
+# Build Python + TypeScript artifacts
+./scripts/build.sh
+
+# Or build just the Python distribution artifacts
 uv build
 ```
 
@@ -111,8 +135,17 @@ uv build
 
 ```bash
 # Build and publish to PyPI (requires credentials)
-./publish.sh
+./scripts/publish.sh
 ```
+
+### Automation scripts
+
+- `./scripts/setup.sh` – bootstrap uv, pnpm, widget bundle, and pre-commit hooks
+- `./scripts/build.sh` – reproduce the release build locally
+- `./scripts/pre-release.sh` – run the full battery of quality checks
+- `./scripts/release.sh` – orchestrate the release (creates tags, publishes to PyPI/GitHub)
+- `./scripts/test_notebooks.sh` – execute demo notebooks (uses `./scripts/nb.sh` under the hood)
+- `./scripts/setup-visual-tests.sh` – install Playwright browsers for visual tests
 
 ## License
 

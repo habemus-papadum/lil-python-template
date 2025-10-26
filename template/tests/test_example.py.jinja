@@ -13,3 +13,13 @@ def test_version():
 def test_import():
     """Test that the package can be imported."""
     assert {{ package_slug }} is not None
+
+{% if include_ts_widgets %}
+
+def test_widget_payload():
+    """Widget helper produces a JSON-serializable payload."""
+    widget = {{ package_slug }}.Widget(title="Hello", body="World")
+    payload = widget.to_payload()
+    assert payload["title"] == "Hello"
+    assert payload["body"] == "World"
+{% endif %}

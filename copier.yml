@@ -14,11 +14,10 @@ _templates_suffix: ".jinja"
 # Tasks to run after generation
 _tasks:
   - command: "uv sync"
-  - command: "chmod +x release.sh"
-  - command: "chmod +x publish.sh"
-  - command: "chmod +x nb.sh"
-  - command: "chmod +x test_notebooks.sh"
+  - command: "chmod +x scripts/*.sh"
   - command: "cd docs && ln -sf ../README.md index.md"
+  - command: "rm -rf widgets src/{{ package_slug }}/widgets package.json pnpm-workspace.yaml .npmrc .pnpm-approvals.yaml"
+    when: "{{ not include_ts_widgets }}"
   - command: "git init"
     when: "{{ init_git_and_github }}"
   - command: "git add ."
@@ -27,7 +26,7 @@ _tasks:
     when: "{{ init_git_and_github }}"
   - command: "gh repo create {{ github_username }}/{{ package_name }} --public --source=. --remote=origin --push"
     when: "{{ init_git_and_github }}"
-  - command: "./publish.sh"
+  - command: "./scripts/publish.sh"
     when: "{{ init_git_and_github and publish_to_pypi }}"
 
 # Questions for the user
@@ -66,6 +65,23 @@ github_username:
   type: str
   help: GitHub username
   default: "habemus-papadum"
+
+include_ts_widgets:
+  type: bool
+  help: Include the TypeScript widget workspace (pnpm, widgets submodule, CI integration)?
+  default: true
+
+widget_package_name:
+  type: str
+  help: npm package name (optionally scoped) for the widgets workspace
+  default: "@{{ github_username | replace('_', '-') | replace(' ', '-') | lower }}/{{ package_slug | replace('_', '-') }}-widgets"
+  when: "{{ include_ts_widgets }}"
+
+widget_global_name:
+  type: str
+  help: Global variable exposed by the widgets IIFE bundle
+  default: "{{ package_slug | replace('_', ' ') | title | replace(' ', '') }}Widgets"
+  when: "{{ include_ts_widgets }}"
 
 init_git_and_github:
   type: bool

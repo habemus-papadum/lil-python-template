@@ -25,7 +25,7 @@ jupyter lab demos/01-basic.ipynb
 After creating or modifying notebooks, test them with:
 
 ```bash
-./test_notebooks.sh
+./scripts/test_notebooks.sh
 ```
 
 This ensures all notebooks execute without errors.
