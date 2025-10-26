@@ -129,6 +129,9 @@ run_validation_suite() {
         fi
     fi
 
+    echo -e "${YELLOW}Dry-running release script (testing mode)...${NC}"
+    ./scripts/release.sh --testing patch
+
     popd >/dev/null
 }
 

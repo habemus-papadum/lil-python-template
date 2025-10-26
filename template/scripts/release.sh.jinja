@@ -76,6 +76,7 @@ class ReleaseContext:
         self.current_version: str = ""
         self.release_version: str = ""
         self.next_dev_version: str = ""
+        self.testing: bool = False
 
 
 # Global context
@@ -730,6 +731,8 @@ def show_step_selector() -> list[Step]:
 
 def show_acknowledgment_guard(bump_level: str) -> bool:
     """Show acknowledgment guard and return whether to proceed."""
+    if getattr(ctx, "testing", False):
+        return True
     panel = Panel.fit(
         "[bold red]⚠️  WARNING: This script will perform a RELEASE ⚠️[/bold red]\n\n"
         "This script will:\n"
@@ -761,10 +764,16 @@ def main() -> None:
         choices=["patch", "minor", "major"],
         help="Version bump level for next development version",
     )
+    parser.add_argument(
+        "--testing",
+        action="store_true",
+        help="Testing/dry-run mode that skips any operations pushing to git remotes or publishing releases",
+    )
     args = parser.parse_args()
 
     # Set global context
     ctx.bump_level = args.bump_level
+    ctx.testing = args.testing
 
     # Show title
     title = Panel.fit(
@@ -773,6 +782,11 @@ def main() -> None:
         border_style="cyan",
     )
     console.print(title)
+
+    if ctx.testing:
+        console.print("[yellow]Testing mode enabled: skipping interactive release flow and all remote/publish actions.[/yellow]")
+        console.print("[green]✓[/green] No release steps were executed.")
+        sys.exit(0)
 
     # Show acknowledgment guard
     if not show_acknowledgment_guard(args.bump_level):
