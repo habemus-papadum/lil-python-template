@@ -128,7 +128,7 @@ All template files use `.jinja` extension and Jinja2 syntax:
 - `{% if condition %}...{% endif %}` - Conditional content
 - Dynamic file/directory names use `{{ package_slug }}` in path
 
-Example: `template/src/{{ package_slug }}/__init__.py.jinja` becomes `src/my_package/__init__.py` after rendering.
+Example: `template/src/pdum/{{ package_slug }}/__init__.py.jinja` becomes `src/pdum/my_package/__init__.py` after rendering.
 
 ## UV Dependency Management
 

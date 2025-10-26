@@ -28,6 +28,14 @@ Or using uv:
 uv pip install {{ package_name }}
 ```
 
+## Usage
+
+```python
+from pdum import {{ package_slug }}
+
+print({{ package_slug }}.__version__)
+```
+
 ## Development
 
 This project uses [UV](https://docs.astral.sh/uv/) for dependency management.
@@ -70,7 +78,7 @@ uv run pytest tests/test_example.py
 uv run pytest tests/test_example.py::test_version
 
 # Run tests with coverage
-uv run pytest --cov=src/{{ package_slug }} --cov-report=xml --cov-report=term
+uv run pytest --cov=src/pdum/{{ package_slug }} --cov-report=xml --cov-report=term
 ```
 
 ### Code Quality

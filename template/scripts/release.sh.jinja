@@ -39,7 +39,7 @@ console = Console()
 # File paths
 REPO_ROOT = Path(__file__).parent.parent  # Go up from scripts/ to repo root
 PYPROJECT_TOML = REPO_ROOT / "pyproject.toml"
-INIT_PY = REPO_ROOT / "src" / "{{ package_slug }}" / "__init__.py"
+INIT_PY = REPO_ROOT / "src" / "pdum" / "{{ package_slug }}" / "__init__.py"
 {% if include_ts_widgets -%}
 WIDGETS_PACKAGE_JSON = REPO_ROOT / "widgets" / "package.json"
 VERSION_TS = REPO_ROOT / "widgets" / "src" / "version.ts"
@@ -280,7 +280,7 @@ def build_widgets() -> None:
         capture_output=True,
     )
 
-    python_bundle_path = "src/{{ package_slug }}/widgets/index.js"
+    python_bundle_path = "src/pdum/{{ package_slug }}/widgets/index.js"
     python_result = run_command(
         ["git", "status", "--porcelain", python_bundle_path],
         "Checking for Python bundle changes",

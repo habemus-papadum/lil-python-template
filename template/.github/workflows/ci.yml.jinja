@@ -106,7 +106,7 @@ jobs:
         run: uv run ruff check .
 
       - name: Run Tests with Coverage
-        run: uv run pytest --cov=src/{% endraw %}{{ package_slug }}{% raw %} --cov-report=xml --cov-report=term
+        run: uv run pytest --cov=src/{% endraw %}pdum/{{ package_slug }}{% raw %} --cov-report=xml --cov-report=term
 {% endraw %}
 {% if include_docs %}{% raw %}
       - name: Build Documentation
