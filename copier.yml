@@ -26,8 +26,6 @@ _tasks:
     when: "{{ init_git_and_github }}"
   - command: "gh repo create {{ github_username }}/{{ package_name }} --public --source=. --remote=origin --push"
     when: "{{ init_git_and_github }}"
-  - command: "./scripts/publish.sh"
-    when: "{{ init_git_and_github and publish_to_pypi }}"
 
 # Questions for the user
 package_name:
@@ -87,9 +85,3 @@ init_git_and_github:
   type: bool
   help: Initialize git repository and create GitHub repo?
   default: true
-
-publish_to_pypi:
-  type: bool
-  help: Publish package to PyPI to reserve the name?
-  default: true
-  when: "{{ init_git_and_github }}"
