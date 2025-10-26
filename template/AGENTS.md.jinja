@@ -4,7 +4,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project Overview
 
-This is a Python library called `{{ package_name }}` (package name: `{{ package_name }}`, module name: `{{ package_slug }}`). {{ package_description }}
+This is a Python library called `{{ package_name }}` (package name: `{{ package_name }}`, module name: `pdum.{{ package_slug }}`). {{ package_description }}
 
 The project uses a modern Python toolchain with UV for dependency management.
 
@@ -13,7 +13,7 @@ The project uses a modern Python toolchain with UV for dependency management.
 ### Version Management
 **NEVER modify the version number in any file.** Version numbers are managed exclusively by humans. Do not change:
 - `pyproject.toml` version field
-- `src/{{ package_slug }}/__init__.py` `__version__` variable
+- `src/pdum/{{ package_slug }}/__init__.py` `__version__` variable
 - Any version references in documentation
 
 If you think a version change is needed, inform the user but do not make the change yourself.
@@ -56,7 +56,7 @@ uv run pytest tests/test_example.py
 uv run pytest tests/test_example.py::test_version
 
 # Run tests with coverage
-uv run pytest --cov=src/{{ package_slug }} --cov-report=xml --cov-report=term
+uv run pytest --cov=src/pdum/{{ package_slug }} --cov-report=xml --cov-report=term
 ```
 
 ### Code Quality
@@ -107,7 +107,7 @@ pnpm --filter '{{ widget_package_name }}' build:python
 pnpm --filter '{{ widget_package_name }}' test:coverage
 ```
 
-- Widget bundle lives in `widgets/`; the compiled JS is copied into `src/{{ package_slug }}/widgets/index.js`
+- Widget bundle lives in `widgets/`; the compiled JS is copied into `src/pdum/{{ package_slug }}/widgets/index.js`
 - Never commit `widgets/dist/`—it is generated
 - Use `./scripts/pre-release.sh` before asking for review or release
 {%- endif %}
@@ -115,7 +115,7 @@ pnpm --filter '{{ widget_package_name }}' test:coverage
 ## Architecture
 
 ### Project Structure
-- **src/{{ package_slug }}/**: Main package source code (src-layout)
+- **src/pdum/{{ package_slug }}/**: Main package source code (src-layout)
   - `__init__.py`: Package initialization and version
 - **tests/**: Test suite using pytest
   - `test_example.py`: Example tests
@@ -147,7 +147,7 @@ pnpm --filter '{{ widget_package_name }}' test:coverage
 - Test classes must start with `Test` prefix
 - Test functions must start with `test_` prefix
 - Tests run with `-s` flag (no capture) by default
-- Coverage reporting: use `--cov=src/{{ package_slug }} --cov-report=xml --cov-report=term`
+- Coverage reporting: use `--cov=src/pdum/{{ package_slug }} --cov-report=xml --cov-report=term`
 
 ### Testing Configuration
 The pytest configuration is in `pyproject.toml`:
@@ -163,7 +163,7 @@ python_functions = ["test_*"]
 Coverage configuration is also in `pyproject.toml`:
 ```toml
 [tool.coverage.run]
-source = ["src/{{ package_slug }}"]
+source = ["src/pdum/{{ package_slug }}"]
 relative_files = true
 omit = [
     "*/tests/*",

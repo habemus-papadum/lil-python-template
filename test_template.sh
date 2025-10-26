@@ -121,10 +121,10 @@ run_validation_suite() {
     ./scripts/test_notebooks.sh --no-inplace
 
     if [ "$include_ts" = "true" ]; then
-        if [ -f "src/test_awesome_package/widgets/index.js" ]; then
+        if [ -f "src/pdum/test_awesome_package/widgets/index.js" ]; then
             echo -e "${GREEN}✓${NC} Widget bundle copied into Python package"
         else
-            echo -e "${RED}✗${NC} Widget bundle missing at src/test_awesome_package/widgets/index.js"
+            echo -e "${RED}✗${NC} Widget bundle missing at src/pdum/test_awesome_package/widgets/index.js"
             exit 1
         fi
     fi
@@ -146,7 +146,7 @@ test_with_widgets() {
         widgets/package.json \
         widgets/src/index.ts \
         widgets/src/version.ts \
-        src/test_awesome_package/widgets/__init__.py; do
+        src/pdum/test_awesome_package/widgets/__init__.py; do
         if [ -f "$dir/$file" ]; then
             echo -e "${GREEN}✓${NC} $file exists"
         else
@@ -181,7 +181,7 @@ test_without_widgets() {
     verify_common_files "$dir"
 
     echo -e "${YELLOW}Ensuring widget workspace files were removed...${NC}"
-    for file in package.json pnpm-workspace.yaml .npmrc .pnpm-approvals.yaml widgets src/test_awesome_package/widgets; do
+    for file in package.json pnpm-workspace.yaml .npmrc .pnpm-approvals.yaml widgets src/pdum/test_awesome_package/widgets; do
         if [ -e "$dir/$file" ]; then
             echo -e "${RED}✗${NC} $file should not exist when widgets are disabled"
             exit 1
