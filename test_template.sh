@@ -136,7 +136,7 @@ run_validation_suite() {
 }
 
 test_with_widgets() {
-    local dir="test-generated-project"
+    local dir="pdum_test-generated-project"
     run_copier "$dir"
     verify_common_files "$dir"
 
@@ -179,7 +179,7 @@ test_with_widgets() {
 }
 
 test_without_widgets() {
-    local dir="test-generated-project-no-ts"
+    local dir="pdum_test-generated-project-no-ts"
     run_copier "$dir" "-d" "include_ts_widgets=false"
     verify_common_files "$dir"
 
@@ -207,14 +207,17 @@ test_without_widgets() {
 main() {
     echo -e "${YELLOW}Testing lil-python-template copier template${NC}"
     test_with_widgets
+    rm -rf pdum_test-generated-project 
     test_without_widgets
+    echo -e "${YELLOW}Cleaning up test directories...${NC}"
+    rm -rf pdum_test-generated-project-no-ts
 
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${GREEN}All template tests passed! ✓${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
     echo -e "${YELLOW}Cleaning up test directories...${NC}"
-    rm -rf test-generated-project test-generated-project-no-ts
+    rm -rf pdum_test-generated-project pdum_test-generated-project-no-ts
     echo -e "${GREEN}Done!${NC}"
 }
 
