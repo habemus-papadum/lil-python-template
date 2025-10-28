@@ -38,7 +38,7 @@ run_copier() {
 
     echo -e "${YELLOW}Generating ${target_dir}...${NC}"
     local cmd=(
-        copier copy --defaults --trust --vcs-ref=HEAD
+        uv run copier copy --defaults --trust --vcs-ref=HEAD
         "${copier_args[@]}"
     )
 
