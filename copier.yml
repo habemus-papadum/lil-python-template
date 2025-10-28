@@ -18,6 +18,8 @@ _tasks:
   - command: "cd docs && ln -sf ../README.md index.md"
   - command: "rm -rf widgets src/pdum/{{ package_slug }}/widgets package.json pnpm-workspace.yaml .npmrc .pnpm-approvals.yaml"
     when: "{{ not include_ts_widgets }}"
+  - command: "pnpm install"
+    when: "{{ include_ts_widgets }}"
   - command: "git init"
     when: "{{ init_git_and_github }}"
   - command: "git add ."
