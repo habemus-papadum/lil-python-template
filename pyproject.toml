@@ -1,0 +1,10 @@
+[project]
+name = "lil-python-template"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "copier>=9.10.3",
+    "jinja2-time>=0.2.0",
+]

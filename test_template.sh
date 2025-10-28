@@ -18,7 +18,7 @@ fi
 
 # Create test project using copier
 echo -e "${YELLOW}Running copier to generate test project...${NC}"
-copier copy --defaults --trust --vcs-ref=HEAD \
+uv run copier copy --defaults --trust --vcs-ref=HEAD \
     -d package_name="test-awesome-package" \
     -d package_description="A test package generated from the template" \
     -d python_version="3.12" \
