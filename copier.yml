@@ -24,15 +24,20 @@ _tasks:
     when: "{{ init_git_and_github }}"
   - command: "git commit -m 'Initial commit from lil-python-template'"
     when: "{{ init_git_and_github }}"
-  - command: "gh repo create {{ github_username }}/{{ package_name }} --public --source=. --remote=origin --push"
+  - command: "gh repo create {{ github_username }}/{{ github_repo_name }} --public --source=. --remote=origin --push"
     when: "{{ init_git_and_github }}"
 
 # Questions for the user
 package_name:
   type: str
   help: What is the package name? (e.g., my-awesome-package)
+  default: "{{ (_copier_conf.dst_path | basename)[5:] if (_copier_conf.dst_path | basename).startswith('pdum_') else (_copier_conf.dst_path | basename) }}"
+  validator: "{% if not (_copier_conf.dst_path | basename).startswith('pdum_') %}Destination directory must be prefixed with 'pdum_'{% endif %}"
+
+github_repo_name:
+  type: str
+  help: GitHub repository name (keeps pdum_ prefix from destination directory)
   default: "{{ _copier_conf.dst_path | basename }}"
-  validator: "{% if not package_name %}Package name is required{% endif %}"
 
 package_slug:
   type: str
