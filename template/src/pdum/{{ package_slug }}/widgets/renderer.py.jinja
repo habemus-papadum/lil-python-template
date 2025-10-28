@@ -46,6 +46,6 @@ def render_widget_html(widget: Widget | dict[str, Any]) -> str:
     encoded = html.escape(json.dumps(payload))
     return dedent(
         f"""
-        <div class="tp-widget-host" {_DATA_ATTRIBUTE}="{encoded}"></div>
+        <div class="pdum-{{ package_slug | replace('_', '-') }}-widget" {_DATA_ATTRIBUTE}="{encoded}"></div>
         """
     ).strip()

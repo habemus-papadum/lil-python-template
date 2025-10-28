@@ -1,0 +1,25 @@
+/**
+ * Minimal starter styles for widgets
+ *
+ * Naming Convention:
+ * All CSS classes use the prefix: pdum-{{ package_slug | replace('_', '-') }}-*
+ * This prevents conflicts with other packages and frameworks.
+ */
+
+/* Main widget container - customize as needed */
+.pdum-{{ package_slug | replace('_', '-') }}-widget {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Widget title element */
+.pdum-{{ package_slug | replace('_', '-') }}-widget__title {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+/* Widget body/content element */
+.pdum-{{ package_slug | replace('_', '-') }}-widget__body {
+  margin: 0;
+}

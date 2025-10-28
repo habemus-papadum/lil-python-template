@@ -2,11 +2,12 @@ import { renderWidget } from './widget';
 import type { WidgetPayload } from './types';
 import { VERSION } from './version';
 
+const WIDGET_CLASS = 'pdum-{{ package_slug | replace('_', '-') }}-widget';
 const DATA_ATTRIBUTE = 'data-{{ package_slug | replace('_', '-') }}-widget';
 declare const __WIDGET_STYLES__: string;
 
 function injectStyles() {
-  const styleId = '{{ package_slug | replace('_', '-') }}-widget-styles';
+  const styleId = 'pdum-{{ package_slug | replace('_', '-') }}-widget-styles';
   if (document.getElementById(styleId)) {
     return;
   }
@@ -19,7 +20,7 @@ function injectStyles() {
 
 function boot() {
   injectStyles();
-  const nodes = document.querySelectorAll(`[${DATA_ATTRIBUTE}]`);
+  const nodes = document.querySelectorAll(`.${WIDGET_CLASS}`);
   nodes.forEach((node) => {
     const element = node as HTMLElement;
     const raw = element.getAttribute(DATA_ATTRIBUTE);

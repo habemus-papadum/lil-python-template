@@ -10,8 +10,8 @@ from typing import Any
 class Widget:
     """Minimal payload describing a widget render."""
 
-    title: str = "Widget Preview"
-    body: str = "Render structured data here."
+    title: str = "{{ package_name }}"
+    body: str = "Version: 0.1.0-alpha"
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_payload(self) -> dict[str, Any]:
@@ -22,3 +22,13 @@ class Widget:
             "body": self.body,
             "metadata": self.metadata,
         }
+
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebook display.
+
+        Note: This assumes setup_notebook() has already been called to inject
+        the widget JavaScript bundle.
+        """
+        from .renderer import render_widget_html
+
+        return render_widget_html(self)
