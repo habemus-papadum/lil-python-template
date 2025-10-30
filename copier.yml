@@ -28,6 +28,10 @@ _tasks:
     when: "{{ init_git_and_github }}"
   - command: "gh repo create {{ github_username }}/{{ github_repo_name }} --public --source=. --remote=origin --push"
     when: "{{ init_git_and_github }}"
+  - command: "gh api method POST -H 'Accept: application/vnd.github+json'  repos/{{ github_username }}/{{ github_repo_name }}/pages  -f build_type='workflow'"
+    when: "{{ init_git_and_github }}"
+  - command: "gh api --method POST -H 'Accept: application/vnd.github+json' /repos/{{ github_username }}/{{ github_repo_name }}/environments/github-pages/deployment-branch-policies -f name='v*' -f type='tag'"
+    when: "{{ init_git_and_github }}"
 
 # Questions for the user
 package_name:
