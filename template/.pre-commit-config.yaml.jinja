@@ -32,14 +32,3 @@ repos:
       - id: ruff-format
         name: Format Python with ruff
 
-{% if include_ts_widgets %}
-  # TypeScript linting with eslint
-  - repo: local
-    hooks:
-      - id: typescript-lint
-        name: Lint TypeScript with eslint
-        entry: pnpm --filter '{{ widget_package_name }}' lint
-        language: system
-        files: widgets/src/.*\.(ts|tsx)$
-        pass_filenames: false
-{% endif %}

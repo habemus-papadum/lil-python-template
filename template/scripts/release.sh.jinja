@@ -5,8 +5,8 @@ This script automates the release process:
 1. Verifies git repo is clean
 2. Validates version has -alpha suffix
 3. Calculates release version (strips -alpha)
-4. Runs validation (lint, tests{% if include_ts_widgets %}, pnpm workspace checks{% endif %}{% if include_docs %}, docs build{% endif %})
-5. Updates version files{% if include_ts_widgets %} (pyproject.toml, __init__.py, widgets/package.json, widgets/src/version.ts){% else %} (pyproject.toml, __init__.py){% endif %}
+4. Runs validation (lint, tests{% if include_docs %}, docs build{% endif %})
+5. Updates version files (pyproject.toml, __init__.py)
 6. Updates uv.lock with new version
 7. Creates release commit and tag
 8. Pushes tag to origin
@@ -40,11 +40,6 @@ console = Console()
 REPO_ROOT = Path(__file__).parent.parent  # Go up from scripts/ to repo root
 PYPROJECT_TOML = REPO_ROOT / "pyproject.toml"
 INIT_PY = REPO_ROOT / "src" / "pdum" / "{{ package_slug }}" / "__init__.py"
-{% if include_ts_widgets -%}
-WIDGETS_PACKAGE_JSON = REPO_ROOT / "widgets" / "package.json"
-VERSION_TS = REPO_ROOT / "widgets" / "src" / "version.ts"
-{% endif %}
-
 
 class StepCategory(Enum):
     """Categories of release steps."""
@@ -186,27 +181,11 @@ def read_current_version() -> None:
     init_version = read_version_from_file(INIT_PY, r'(__version__ = ")([^"]+)(")')
     console.print(f"  [cyan]__init__.py:[/cyan] {init_version}")
 
-{% if include_ts_widgets %}
-    widgets_version = read_package_json_version(WIDGETS_PACKAGE_JSON)
-    console.print(f"  [cyan]widgets/package.json:[/cyan] {widgets_version}")
-
-    version_ts = read_version_from_file(VERSION_TS, r"(export const VERSION = ')([^']+)(')")
-    console.print(f"  [cyan]widgets/src/version.ts:[/cyan] {version_ts}")
-
-    if pyproject_version != init_version or pyproject_version != widgets_version or pyproject_version != version_ts:
-        console.print("[red]✗ ERROR:[/red] Version mismatch!")
-        console.print(f"  [yellow]pyproject.toml:[/yellow] {pyproject_version}")
-        console.print(f"  [yellow]__init__.py:[/yellow] {init_version}")
-        console.print(f"  [yellow]widgets/package.json:[/yellow] {widgets_version}")
-        console.print(f"  [yellow]widgets/src/version.ts:[/yellow] {version_ts}")
-        sys.exit(1)
-{% else %}
     if pyproject_version != init_version:
         console.print("[red]✗ ERROR:[/red] Version mismatch!")
         console.print(f"  [yellow]pyproject.toml:[/yellow] {pyproject_version}")
         console.print(f"  [yellow]__init__.py:[/yellow] {init_version}")
         sys.exit(1)
-{% endif %}
 
     ctx.current_version = pyproject_version
     console.print(f"\n[green]✓[/green] Current version: [bold]{ctx.current_version}[/bold]")
@@ -257,70 +236,6 @@ def build_docs() -> None:
     run_command(["uv", "run", "mkdocs", "build"], "Building mkdocs site")
 
 
-{% if include_ts_widgets %}
-def build_widgets_typescript() -> None:
-    """Build TypeScript widgets."""
-    console.rule("[bold blue]Building TypeScript Widgets")
-    run_command(["pnpm", "build"], "Building widgets with pnpm")
-
-
-def build_widgets() -> None:
-    """Build JavaScript widgets for Python distribution and verify no uncommitted changes."""
-    console.rule("[bold blue]Building JavaScript Widgets for Python")
-
-    run_command([
-        "pnpm",
-        "--filter",
-        "{{ widget_package_name }}",
-        "build:python",
-    ], "Building widgets with pnpm")
-
-    result = run_command(
-        ["git", "status", "--porcelain", "widgets/dist"],
-        "Checking for widget build changes",
-        capture_output=True,
-    )
-
-    python_bundle_path = "src/pdum/{{ package_slug }}/widgets/index.js"
-    python_result = run_command(
-        ["git", "status", "--porcelain", python_bundle_path],
-        "Checking for Python bundle changes",
-        capture_output=True,
-    )
-
-    output = f"{result.stdout}{python_result.stdout}"
-
-    if output.strip():
-        console.print("[red]✗ ERROR:[/red] Widget build produced uncommitted changes!")
-        console.print("\n[yellow]Please run 'pnpm build' and commit the changes before releasing.[/yellow]")
-        console.print(output)
-        sys.exit(1)
-
-    console.print("[green]✓[/green] Widget build is up-to-date")
-
-
-def run_widget_linting() -> None:
-    """Run widget linting checks with pnpm."""
-    console.rule("[bold blue]Running Widget Linting Checks")
-    run_command(["pnpm", "lint"], "Running pnpm lint")
-
-
-def run_widget_typecheck() -> None:
-    """Run widget type checking with pnpm."""
-    console.rule("[bold blue]Running Widget Type Checking")
-    run_command([
-        "pnpm",
-        "--filter",
-        "{{ widget_package_name }}",
-        "typecheck",
-    ], "Running pnpm typecheck")
-
-
-def run_widget_tests() -> None:
-    """Run widget unit tests with pnpm."""
-    console.rule("[bold blue]Running Widget Unit Tests")
-    run_command(["pnpm", "test"], "Running pnpm test")
-{% endif %}
 
 
 def update_version_files() -> None:
@@ -332,10 +247,6 @@ def update_version_files() -> None:
 
     write_version_to_file(PYPROJECT_TOML, r'^(version = ")([^"]+)(")', ctx.release_version)
     write_version_to_file(INIT_PY, r'(__version__ = ")([^"]+)(")', ctx.release_version)
-{% if include_ts_widgets %}
-    write_package_json_version(WIDGETS_PACKAGE_JSON, ctx.release_version)
-    write_version_to_file(VERSION_TS, r"(export const VERSION = ')([^']+)(')", ctx.release_version)
-{% endif %}
     console.print(
         f"[green]✓[/green] Updated version to [bold]{ctx.release_version}[/bold] in all files"
     )
@@ -357,10 +268,6 @@ def create_release_commit() -> None:
             "add",
             str(PYPROJECT_TOML),
             str(INIT_PY),
-{% if include_ts_widgets %}
-            str(WIDGETS_PACKAGE_JSON),
-            str(VERSION_TS),
-{% endif %}
             "uv.lock",
         ],
         "Staging version files and lockfile",
@@ -459,10 +366,6 @@ def update_to_dev_version() -> None:
 
     write_version_to_file(PYPROJECT_TOML, r'^(version = ")([^"]+)(")', ctx.next_dev_version)
     write_version_to_file(INIT_PY, r'(__version__ = ")([^"]+)(")', ctx.next_dev_version)
-{% if include_ts_widgets %}
-    write_package_json_version(WIDGETS_PACKAGE_JSON, ctx.next_dev_version)
-    write_version_to_file(VERSION_TS, r"(export const VERSION = ')([^']+)(')", ctx.next_dev_version)
-{% endif %}
     console.print(
         f"[green]✓[/green] Updated version to [bold]{ctx.next_dev_version}[/bold] in all files"
     )
@@ -484,10 +387,6 @@ def create_dev_commit() -> None:
             "add",
             str(PYPROJECT_TOML),
             str(INIT_PY),
-{% if include_ts_widgets %}
-            str(WIDGETS_PACKAGE_JSON),
-            str(VERSION_TS),
-{% endif %}
             "uv.lock",
         ],
         "Staging version files and lockfile",
@@ -527,7 +426,7 @@ STEPS: list[Step] = [
     Step(
         id="read_version",
         name="Read Current Version",
-        description="Read version from pyproject.toml, __init__.py{% if include_ts_widgets %}, widgets/package.json, and widgets/src/version.ts{% endif %}",
+        description="Read version from pyproject.toml and __init__.py",
         category=StepCategory.VALIDATION,
         action=read_current_version,
     ),
@@ -545,49 +444,6 @@ STEPS: list[Step] = [
         category=StepCategory.VALIDATION,
         action=calculate_release_version,
     ),
-{% if include_ts_widgets %}
-    # TypeScript processing (lint, typecheck, build, build for Python, test)
-    Step(
-        id="widget_linting",
-        name="Run Widget Linting",
-        description="Check widget code quality with pnpm lint",
-        category=StepCategory.VALIDATION,
-        action=run_widget_linting,
-        notes="Usually fast (< 10s)",
-    ),
-    Step(
-        id="widget_typecheck",
-        name="Run Widget Type Check",
-        description="Check TypeScript types with pnpm typecheck",
-        category=StepCategory.VALIDATION,
-        action=run_widget_typecheck,
-        notes="Usually fast (< 10s)",
-    ),
-    Step(
-        id="build_widgets_typescript",
-        name="Build TypeScript Widgets",
-        description="Build TypeScript widgets with pnpm build",
-        category=StepCategory.VALIDATION,
-        action=build_widgets_typescript,
-        notes="Usually fast (< 30s)",
-    ),
-    Step(
-        id="build_widgets",
-        name="Build Widgets for Python",
-        description="Build JavaScript widgets for Python distribution and verify no uncommitted changes",
-        category=StepCategory.VALIDATION,
-        action=build_widgets,
-        notes="Usually fast (< 30s)",
-    ),
-    Step(
-        id="widget_tests",
-        name="Run Widget Tests",
-        description="Execute widget test suite with pnpm test",
-        category=StepCategory.VALIDATION,
-        action=run_widget_tests,
-        notes="Usually fast (< 30s)",
-    ),
-{% endif %}
     # Python processing (lint, test, build docs)
     Step(
         id="run_linting",
@@ -619,7 +475,7 @@ STEPS: list[Step] = [
     Step(
         id="update_version",
         name="Update Version Files",
-        description="Update version to release version in pyproject.toml, __init__.py{% if include_ts_widgets %}, widgets/package.json, and widgets/src/version.ts{% endif %}",
+        description="Update version to release version in pyproject.toml and __init__.py",
         category=StepCategory.PRE_RELEASE,
         action=update_version_files,
     ),

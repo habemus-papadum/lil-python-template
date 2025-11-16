@@ -10,25 +10,6 @@ echo "================================"
 echo "Pre-Release Checks"
 echo "================================"
 
-{% if include_ts_widgets %}
-echo ""
-echo "1. TypeScript Lint..."
-pnpm --filter '{{ widget_package_name }}' lint
-
-
-echo "2. TypeScript Type Check..."
-pnpm --filter '{{ widget_package_name }}' typecheck
-
-
-echo "3. TypeScript Build..."
-pnpm --filter '{{ widget_package_name }}' build:python
-
-
-echo "4. TypeScript Tests..."
-pnpm --filter '{{ widget_package_name }}' test
-{% else %}
-echo "(Skipping TypeScript checks - widgets disabled)"
-{% endif %}
 
 
 echo "5. Check Git Status (must be clean)..."

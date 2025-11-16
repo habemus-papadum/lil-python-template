@@ -27,23 +27,10 @@ check_command() {
 
 echo "1. Checking prerequisites..."
 check_command uv "https://docs.astral.sh/uv/getting-started/installation/"
-{% if include_ts_widgets %}
-check_command pnpm "https://pnpm.io/installation"
-{% endif %}
 
 echo ""
 echo "2. Installing Python dependencies..."
 uv sync --frozen{% if include_docs %} --all-extras{% endif %}
-
-{% if include_ts_widgets %}
-echo ""
-echo "3. Installing pnpm packages..."
-pnpm install
-
-
-echo "4. Building TypeScript widgets..."
-pnpm --filter '{{ widget_package_name }}' build:python
-{% endif %}
 
 if [ -f ".pre-commit-config.yaml" ]; then
     echo ""
@@ -53,15 +40,6 @@ else
     echo ""
     echo "5. Skipping pre-commit hook installation (no .pre-commit-config.yaml)"
 fi
-
-echo ""
-echo "Next steps:"
-{% if include_ts_widgets %}
-echo "  • pnpm --filter '{{ widget_package_name }}' lint"
-echo "  • pnpm --filter '{{ widget_package_name }}' test"
-{% endif %}
-echo "  • uv run pytest"
-echo "  • uv run mkdocs serve"
 
 echo ""
 echo "============================================="

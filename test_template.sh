@@ -180,7 +180,7 @@ test_with_widgets() {
 
 test_without_widgets() {
     local dir="pdum_test-generated-project-no-ts"
-    run_copier "$dir" "-d" "include_ts_widgets=false"
+    run_copier "$dir" 
     verify_common_files "$dir"
 
     echo -e "${YELLOW}Ensuring widget workspace files were removed...${NC}"

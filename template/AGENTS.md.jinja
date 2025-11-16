@@ -94,23 +94,6 @@ uv run mkdocs build
 ./scripts/publish.sh
 ```
 
-{%- if include_ts_widgets %}
-
-### TypeScript widgets (pnpm)
-```bash
-# Workspace-wide lint
-pnpm lint
-
-# Focus on the widgets package
-pnpm --filter '{{ widget_package_name }}' typecheck
-pnpm --filter '{{ widget_package_name }}' build:python
-pnpm --filter '{{ widget_package_name }}' test:coverage
-```
-
-- Widget bundle lives in `widgets/`; the compiled JS is copied into `src/pdum/{{ package_slug }}/widgets/index.js`
-- Never commit `widgets/dist/`—it is generated
-- Use `./scripts/pre-release.sh` before asking for review or release
-{%- endif %}
 
 ## Architecture
 
@@ -128,7 +111,7 @@ pnpm --filter '{{ widget_package_name }}' test:coverage
 
 ### Key Constraints
 - **Python Version**: Requires Python {{ python_version }}+
-- **Dependency Management**: {% if include_ts_widgets %}Uses UV for Python and pnpm for the widgets workspace; uv.lock is committed{% else %}Uses UV exclusively; uv.lock is committed{% endif %}
+- **Dependency Management**: Uses UV exclusively; uv.lock is committed
 - **Build System**: Uses Hatch/Hatchling for building distributions
 {%- if include_docs %}
 - **Documentation Style**: NumPy docstring style (see mkdocs.yml)
@@ -175,9 +158,7 @@ omit = [
 
 ### Continuous Integration
 The project uses GitHub Actions for CI (`.github/workflows/ci.yml`):
-- Runs on every push to main and pull requests
-{% if include_ts_widgets %}- Executes pnpm lint/build/test for the widgets workspace (and publishes a TypeScript coverage badge on main)
-{% endif %}- Executes linting with ruff
+- Runs on every push to main and pull requests- Executes linting with ruff
 - Runs unit tests with coverage reporting
 {%- if include_docs %}
 - Builds documentation to verify it compiles

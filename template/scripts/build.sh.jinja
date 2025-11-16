@@ -27,30 +27,13 @@ check_command() {
 
 echo "1. Checking prerequisites..."
 check_command uv "https://docs.astral.sh/uv/getting-started/installation/"
-{% if include_ts_widgets %}
-check_command pnpm "https://pnpm.io/installation"
-{% endif %}
 
 echo ""
 echo "2. Installing Python dependencies..."
 uv sync --frozen{% if include_docs %} --all-extras{% endif %}
 
-{% if include_ts_widgets %}
-echo ""
-echo "3. Installing pnpm packages..."
-pnpm install
-
-
-echo "4. Type checking TypeScript widgets..."
-pnpm --filter '{{ widget_package_name }}' typecheck
-
-
-echo "5. Building TypeScript widgets..."
-pnpm --filter '{{ widget_package_name }}' build:python
-{% else %}
 echo ""
 echo "3. (Skipped) No TypeScript widgets configured"
-{% endif %}
 
 echo ""
 echo "============================================="

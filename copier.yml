@@ -16,10 +16,6 @@ _tasks:
   - command: "uv sync"
   - command: "chmod +x scripts/*.sh"
   - command: "cd docs && ln -sf ../README.md index.md"
-  - command: "rm -rf widgets src/pdum/{{ package_slug }}/widgets package.json pnpm-workspace.yaml .npmrc .pnpm-approvals.yaml"
-    when: "{{ not include_ts_widgets }}"
-  - command: "pnpm install"
-    when: "{{ include_ts_widgets }}"
   - command: "git init"
     when: "{{ init_git_and_github }}"
   - command: "git add ."
@@ -75,22 +71,6 @@ github_username:
   help: GitHub username
   default: "habemus-papadum"
 
-include_ts_widgets:
-  type: bool
-  help: Include the TypeScript widget workspace (pnpm, widgets submodule, CI integration)?
-  default: true
-
-widget_package_name:
-  type: str
-  help: npm package name (optionally scoped) for the widgets workspace
-  default: "@{{ github_username | replace('_', '-') | replace(' ', '-') | lower }}/{{ package_slug | replace('_', '-') }}-widgets"
-  when: "{{ include_ts_widgets }}"
-
-widget_global_name:
-  type: str
-  help: Global variable exposed by the widgets IIFE bundle
-  default: "{{ package_slug | replace('_', ' ') | title | replace(' ', '') }}Widgets"
-  when: "{{ include_ts_widgets }}"
 
 init_git_and_github:
   type: bool
