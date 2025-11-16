@@ -57,9 +57,7 @@ verify_common_files() {
     echo -e "${YELLOW}Generated project structure (${dir}):${NC}"
     find . -type f \
         -not -path './.git/*' \
-        -not -path './.venv/*' \
-        -not -path './node_modules/*' \
-        -not -path './widgets/node_modules/*' | sort
+        -not -path './.venv/*' | sort
 
     echo -e "${YELLOW}Verifying docs/index.md symlink...${NC}"
     if [ -L "docs/index.md" ]; then
@@ -97,7 +95,6 @@ check_scripts_executable() {
 
 run_validation_suite() {
     local dir=$1
-    local include_ts=$2
     pushd "$dir" >/dev/null
 
     if [ ! -d .git ]; then
@@ -120,73 +117,21 @@ run_validation_suite() {
     echo -e "${YELLOW}Running notebook smoke test...${NC}"
     ./scripts/test_notebooks.sh --no-inplace
 
-    if [ "$include_ts" = "true" ]; then
-        if [ -f "src/pdum/test_awesome_package/widgets/index.js" ]; then
-            echo -e "${GREEN}✓${NC} Widget bundle copied into Python package"
-        else
-            echo -e "${RED}✗${NC} Widget bundle missing at src/pdum/test_awesome_package/widgets/index.js"
-            exit 1
-        fi
-    fi
-
     echo -e "${YELLOW}Dry-running release script (testing mode)...${NC}"
     ./scripts/release.sh --testing patch
 
     popd >/dev/null
 }
 
-test_with_widgets() {
+test_template_generation() {
     local dir="pdum_test-generated-project"
     run_copier "$dir"
-    verify_common_files "$dir"
-
-    echo -e "${YELLOW}Checking TypeScript workspace files...${NC}"
-    for file in \
-        package.json \
-        pnpm-workspace.yaml \
-        .npmrc \
-        .pnpm-approvals.yaml \
-        widgets/package.json \
-        widgets/src/index.ts \
-        widgets/src/version.ts \
-        src/pdum/test_awesome_package/widgets/__init__.py; do
-        if [ -f "$dir/$file" ]; then
-            echo -e "${GREEN}✓${NC} $file exists"
-        else
-            echo -e "${RED}✗${NC} Required file missing: $file"
-            exit 1
-        fi
-    done
-
-    if grep -q '"workspaces"' "$dir/package.json"; then
-        echo -e "${GREEN}✓${NC} pnpm workspace configured"
-    else
-        echo -e "${RED}✗${NC} pnpm workspace missing from package.json"
-        exit 1
-    fi
-
-    check_scripts_executable "$dir" \
-        scripts/setup.sh \
-        scripts/build.sh \
-        scripts/pre-release.sh \
-        scripts/release.sh \
-        scripts/publish.sh \
-        scripts/nb.sh \
-        scripts/test_notebooks.sh \
-        scripts/setup-visual-tests.sh
-
-    run_validation_suite "$dir" true
-}
-
-test_without_widgets() {
-    local dir="pdum_test-generated-project-no-ts"
-    run_copier "$dir" 
     verify_common_files "$dir"
 
     echo -e "${YELLOW}Ensuring widget workspace files were removed...${NC}"
     for file in package.json pnpm-workspace.yaml .npmrc .pnpm-approvals.yaml widgets src/pdum/test_awesome_package/widgets; do
         if [ -e "$dir/$file" ]; then
-            echo -e "${RED}✗${NC} $file should not exist when widgets are disabled"
+            echo -e "${RED}✗${NC} $file should not exist (widgets support removed)"
             exit 1
         fi
     done
@@ -201,23 +146,19 @@ test_without_widgets() {
         scripts/test_notebooks.sh \
         scripts/setup-visual-tests.sh
 
-    run_validation_suite "$dir" false
+    run_validation_suite "$dir"
 }
 
 main() {
     echo -e "${YELLOW}Testing lil-python-template copier template${NC}"
-    test_with_widgets
-    rm -rf pdum_test-generated-project 
-    test_without_widgets
-    echo -e "${YELLOW}Cleaning up test directories...${NC}"
-    rm -rf pdum_test-generated-project-no-ts
+    test_template_generation
 
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${GREEN}All template tests passed! ✓${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
     echo -e "${YELLOW}Cleaning up test directories...${NC}"
-    rm -rf pdum_test-generated-project pdum_test-generated-project-no-ts
+    rm -rf pdum_test-generated-project
     echo -e "${GREEN}Done!${NC}"
 }
 
