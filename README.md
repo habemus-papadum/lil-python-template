@@ -48,10 +48,7 @@ You'll be prompted for:
 - **author_name** - Your name (default: `Nehal Patel`)
 - **author_email** - Your email (default: `nehal@alum.mit.edu`)
 - **github_username** - GitHub username (default: `habemus-papadum`)
-- **include_docs** - Include mkdocs documentation setup (default: `true`)
-- **include_github_actions** - Include GitHub Actions for docs deployment (default: `true`)
 - **init_git_and_github** - Initialize git and create GitHub repository (default: `true`)
-- **publish_to_pypi** - Publish to PyPI to reserve the package name (default: `true`, only shown if `init_git_and_github` is true)
 
 ### After Generation
 

@@ -30,7 +30,7 @@ check_command uv "https://docs.astral.sh/uv/getting-started/installation/"
 
 echo ""
 echo "2. Installing Python dependencies..."
-uv sync --frozen{% if include_docs %} --all-extras{% endif %}
+uv sync --frozen
 
 echo ""
 echo "3. (Skipped) No TypeScript widgets configured"

@@ -27,11 +27,9 @@ uv run ruff check .
 echo "7. Python Tests..."
 uv run pytest
 
-{% if include_docs %}
 echo ""
 echo "8. Documentation Build..."
 uv run mkdocs build
-{% endif %}
 
 
 echo "================================"

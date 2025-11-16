@@ -5,7 +5,7 @@ This script automates the release process:
 1. Verifies git repo is clean
 2. Validates version has -alpha suffix
 3. Calculates release version (strips -alpha)
-4. Runs validation (lint, tests{% if include_docs %}, docs build{% endif %})
+4. Runs validation (lint, tests, docs build)
 5. Updates version files (pyproject.toml, __init__.py)
 6. Updates uv.lock with new version
 7. Creates release commit and tag
@@ -461,7 +461,6 @@ STEPS: list[Step] = [
         action=run_tests,
         notes="Usually fast (< 30s)",
     ),
-{% if include_docs %}
     Step(
         id="build_docs",
         name="Build Documentation",
@@ -470,7 +469,6 @@ STEPS: list[Step] = [
         action=build_docs,
         notes="Moderate speed (30-60s)",
     ),
-{% endif %}
     # Pre-release steps
     Step(
         id="update_version",

@@ -54,8 +54,6 @@ With specific options (bypassing prompts):
 copier copy --defaults --trust \
   -d package_name="my-package" \
   -d python_version="3.12" \
-  -d include_docs=true \
-  -d include_github_actions=true \
   -d init_git_and_github=false \
   . /path/to/output
 ```
@@ -93,7 +91,6 @@ The main variables defined in `copier.yml`:
 - `package_name` - Kebab-case package name (e.g., "my-awesome-package")
 - `package_slug` - Snake_case Python module name derived from package_name
 - `python_version` - Python version requirement (e.g., "3.12")
-- `include_docs` - Boolean for mkdocs documentation setup
 - `include_github_actions` - Boolean for GitHub Actions workflow
 - `init_git_and_github` - Boolean to auto-initialize git and create GitHub repo
 - `publish_to_pypi` - Boolean to auto-publish after GitHub repo creation (only shown if `init_git_and_github` is true)
@@ -101,7 +98,6 @@ The main variables defined in `copier.yml`:
 ### Conditional File Exclusion
 
 Files/directories are excluded via `_exclude` in `copier.yml`:
-- Docs files excluded when `include_docs=false`
 - `.github/` excluded when `include_github_actions=false`
 
 ### Post-Generation Tasks
@@ -118,7 +114,6 @@ The `test_template.sh` script validates:
 1. File generation (all expected files exist)
 2. Template variable substitution (correct names, versions in files)
 3. Functionality (package import, pytest, ruff, build, mkdocs)
-4. Conditional exclusions (docs files absent when `include_docs=false`)
 5. Multiple Python versions (3.11 vs 3.12)
 
 ## Template File Patterns

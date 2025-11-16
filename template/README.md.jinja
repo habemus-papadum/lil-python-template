@@ -2,9 +2,7 @@
 
 [![CI](https://github.com/{{ github_username }}/{{ github_repo_name }}/actions/workflows/ci.yml/badge.svg)](https://github.com/{{ github_username }}/{{ github_repo_name }}/actions/workflows/ci.yml)
 [![Coverage](https://raw.githubusercontent.com/{{ github_username }}/{{ github_repo_name }}/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/{{ github_username }}/{{ github_repo_name }}/blob/python-coverage-comment-action-data/htmlcov/index.html)
-{%- if include_docs %}
 [![Documentation](https://img.shields.io/badge/Documentation-blue.svg)](https://{{ github_username }}.github.io/{{ github_repo_name }}/)
-{%- endif %}
 
 [![PyPI](https://img.shields.io/pypi/v/habemus-papadum-{{ package_name }}.svg)](https://pypi.org/project/habemus-papadum-{{ package_name }}/)
 [![Python {{ python_version }}+](https://img.shields.io/badge/python-{{ python_version }}+-blue.svg)](https://www.python.org/downloads/)
@@ -85,7 +83,6 @@ uv run ruff format .
 # Fix auto-fixable issues
 uv run ruff check --fix .
 ```
-{%- if include_docs %}
 
 ### Documentation
 
@@ -101,7 +98,6 @@ uv run mkdocs build
 ```
 
 **Important**: After making any changes to demo notebooks, run `./scripts/test_notebooks.sh` to verify they execute without errors.
-{%- endif %}
 
 ### Building
 

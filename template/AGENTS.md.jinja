@@ -71,7 +71,6 @@ uv run ruff format .
 uv run ruff check --fix .
 ```
 
-{%- if include_docs %}
 
 ### Documentation
 ```bash
@@ -86,7 +85,6 @@ uv run mkdocs build
 ```
 
 **Important**: After making any changes to demo notebooks (files in `docs/demos/*.ipynb`), you MUST run `./scripts/test_notebooks.sh` to verify the notebook executes without errors. Do not consider notebook changes complete until this test passes.
-{%- endif %}
 
 ### Publishing
 ```bash
@@ -102,20 +100,16 @@ uv run mkdocs build
   - `__init__.py`: Package initialization and version
 - **tests/**: Test suite using pytest
   - `test_example.py`: Example tests
-{%- if include_docs %}
 - **docs/**: MkDocs documentation with mkdocstrings for API reference
   - `index.md`: Home page
   - `reference.md`: API reference
   - `demos/`: Demo notebooks (if included)
-{%- endif %}
 
 ### Key Constraints
 - **Python Version**: Requires Python {{ python_version }}+
 - **Dependency Management**: Uses UV exclusively; uv.lock is committed
 - **Build System**: Uses Hatch/Hatchling for building distributions
-{%- if include_docs %}
 - **Documentation Style**: NumPy docstring style (see mkdocs.yml)
-{%- endif %}
 
 ### Code Standards
 - **Ruff Configuration**:
@@ -160,25 +154,21 @@ omit = [
 The project uses GitHub Actions for CI (`.github/workflows/ci.yml`):
 - Runs on every push to main and pull requests- Executes linting with ruff
 - Runs unit tests with coverage reporting
-{%- if include_docs %}
 - Builds documentation to verify it compiles
-{%- endif %}
 - Posts coverage report as a PR comment
 
-{%- if include_github_actions and include_docs %}
 
 ### Documentation Deployment
 Documentation is deployed to GitHub Pages (`.github/workflows/docs.yml`):
 - Triggered when a GitHub release is published
 - Can also be triggered manually via workflow_dispatch
 - Uses `./scripts/setup.sh` to ensure widgets are built before running `mkdocs build`
-{%- endif %}
 
 ### Release Process
 Releases are managed by the `./scripts/release.sh` script (HUMANS ONLY):
 1. Validates git repo is clean
 2. Checks version has `-alpha` suffix
-3. Runs all validation (tests{% if include_docs %}, notebooks{% endif %}, linting{% if include_docs %}, docs{% endif %})
+3. Runs all validation (tests, notebooks, linting, docs)
 4. Strips `-alpha` from version for release
 5. Creates release commit and tag
 6. Publishes to PyPI
