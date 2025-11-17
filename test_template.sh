@@ -143,8 +143,7 @@ test_template_generation() {
         scripts/release.sh \
         scripts/publish.sh \
         scripts/nb.sh \
-        scripts/test_notebooks.sh \
-        scripts/setup-visual-tests.sh
+        scripts/test_notebooks.sh
 
     run_validation_suite "$dir"
 }
